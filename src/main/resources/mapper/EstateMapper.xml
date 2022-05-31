@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.xuye.estate.mapper.EstateMapper">
+
+    <select id="info" resultType="work.xuye.estate.entity.EstateVO">
+        select e.*, c.name as city_name
+        from estate as e
+                 inner join
+             city as c on e.city_id = c.id
+        where e.deleted = 0
+    </select>
+
+    <select id="searchByName" resultType="work.xuye.estate.entity.EstateVO" parameterType="string">
+        select e.*, c.name as city_name
+        from estate as e
+                 inner join
+             city as c on e.city_id = c.id
+        where e.deleted = 0
+          and e.name like concat('%', #{name}, '%')
+    </select>
+
+</mapper>

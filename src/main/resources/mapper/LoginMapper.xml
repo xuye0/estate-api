@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.xuye.estate.mapper.LoginMapper">
+
+    <select id="staffLogin" resultType="work.xuye.estate.dto.UserInfo">
+        select staff.id,
+               login.role,
+               staff.username
+        from login
+                 inner join staff
+                            on login.user_id = staff.id and staff.user_id = #{user} and login.password = #{password};
+    </select>
+
+    <select id="customerLogin" resultType="work.xuye.estate.dto.UserInfo">
+        select customer.id, login.role, customer.name as username
+        from login
+                 inner join customer
+                            on login.user_id = customer.id
+                                and customer.phone = #{phone} and login.password = #{password}
+    </select>
+
+    <select id="selectByUserIdAndRole" resultType="work.xuye.estate.entity.Login">
+        select *
+        from login
+        where user_id = #{id}
+          and role = #{role}
+    </select>
+
+    <select id="loginList" resultType="work.xuye.estate.dto.LoginInfo">
+        select r.*
+        from (
+                 select l.id       as login_id,
+                        l.password as password,
+                        l.role     as role,
+                        f.username as name,
+                        f.user_id,
+                        l.deleted
+                 from login as l
+                          inner join staff as f on role = 'staff' and f.id = l.`user_id`
+                 union
+                 select l.id as login_id, l.password as password, l.role as role, c.name as name, c.id, l.deleted
+                 from login as l
+                          inner join `customer` as c on role = 'customer' and c.`id` = l.`user_id`
+             ) as r
+        where r.deleted = 0
+    </select>
+
+    <select id="unableLoginStaff" resultType="work.xuye.estate.dto.LoginInfo">
+        select s.id as user_id, s.username as name
+        from staff as s
+        where s.id not in
+              (
+                  select l.user_id
+                  from login as l
+              )
+          and s.deleted = 0
+    </select>
+
+    <select id="unableLoginCustomer" resultType="work.xuye.estate.dto.LoginInfo">
+        select s.id as user_id, s.name
+        from customer as s
+        where s.id not in (
+            select l.user_id
+            from login as l
+        )
+          and s.deleted = 0
+    </select>
+
+</mapper>
+
